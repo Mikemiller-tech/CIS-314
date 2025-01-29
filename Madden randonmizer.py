@@ -1,9 +1,5 @@
 import random
 
-def franchise_decision():
-    """Randomly decide if a player stays under the franchise tag or requests a trade."""
-    return random.choice(["Play", "Request Trade"])
-
 def get_nfl_teams():
     """Return a set of all 32 NFL teams."""
     return {
@@ -17,10 +13,11 @@ def get_nfl_teams():
         "Seattle Seahawks", "Tampa Bay Buccaneers", "Tennessee Titans", "Washington Commanders"
     }
 
-def trade_simulation():
-    """Handle the trade request scenario."""
+def trade_generator():
+    """Handles the trade request scenario for a franchise-tagged player or a player requesting a trade."""
+    print("The player has requested a trade!")
     teams = get_nfl_teams()
-    
+
     # User selects their current team
     user_team = input("Enter the team you are playing for: ").strip()
     if user_team not in teams:
@@ -44,14 +41,57 @@ def trade_simulation():
         else:
             print("Invalid input. Please enter 'yes' or 'no'.")
 
-def main():
-    """Main function to run the simulation."""
-    decision = franchise_decision()
-    if decision == "Play":
-        print("The player will stay under the franchise tag. Program ending.")
+def resign_generator():
+    """Handles the decision for a rookie player choosing between an extension, free agency, or requesting a trade."""
+    decision = random.choice(["Resign", "Test Free Agency", "Request Trade"])
+    
+    if decision == "Resign":
+        print("The player has accepted a contract extension! Program ending.")
+        return
+    elif decision == "Test Free Agency":
+        print("The player has decided to test free agency!")
     else:
         print("The player has requested a trade!")
-        trade_simulation()
+        trade_generator()  # Call trade generator instead of free agency
+        return
+
+    teams = get_nfl_teams()
+    
+    # User selects their current team (for removal)
+    user_team = input("Enter the team you are playing for: ").strip()
+    if user_team not in teams:
+        print("Invalid team name. Please enter a valid NFL team.")
+        return
+
+    teams.remove(user_team)  # Remove user's team from potential signing destinations
+
+    while True:
+        # Generate a random free agency signing
+        signing_team = random.choice(list(teams))
+        print(f"Free Agency offer from: {signing_team}")
+
+        # Ask user if they accept
+        accept = input("Do you accept this offer? (yes/no): ").strip().lower()
+        if accept == "yes":
+            print("Contract signed! Program ending.")
+            break
+        elif accept == "no":
+            print("Rerolling another offer...\n")
+        else:
+            print("Invalid input. Please enter 'yes' or 'no'.")
+
+def main():
+    """Main function to let the user choose between the Trade Generator and the Resign Generator."""
+    while True:
+        choice = input("Do you want the Trade Generator or Resign Generator? (trade/resign): ").strip().lower()
+        if choice == "trade":
+            trade_generator()
+            break
+        elif choice == "resign":
+            resign_generator()
+            break
+        else:
+            print("Invalid input. Please enter 'trade' or 'resign'.")
 
 if __name__ == "__main__":
     main()
