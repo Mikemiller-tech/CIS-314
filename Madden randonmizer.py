@@ -1,97 +1,232 @@
 import random
+import tkinter as tk
+from tkinter import messagebox, simpledialog
+
+def franchise_decision():
+    return random.choice(["Play", "Request Trade"])
 
 def get_nfl_teams():
-    """Return a set of all 32 NFL teams."""
     return {
-        "Arizona Cardinals", "Atlanta Falcons", "Baltimore Ravens", "Buffalo Bills",
-        "Carolina Panthers", "Chicago Bears", "Cincinnati Bengals", "Cleveland Browns",
-        "Dallas Cowboys", "Denver Broncos", "Detroit Lions", "Green Bay Packers",
-        "Houston Texans", "Indianapolis Colts", "Jacksonville Jaguars", "Kansas City Chiefs",
-        "Las Vegas Raiders", "Los Angeles Chargers", "Los Angeles Rams", "Miami Dolphins",
-        "Minnesota Vikings", "New England Patriots", "New Orleans Saints", "New York Giants",
-        "New York Jets", "Philadelphia Eagles", "Pittsburgh Steelers", "San Francisco 49ers",
-        "Seattle Seahawks", "Tampa Bay Buccaneers", "Tennessee Titans", "Washington Commanders"
+        "Cardinals", "Falcons", "Ravens", "Bills",
+        "Panthers", "Bears", "Bengals", "Browns",
+        "Cowboys", "Broncos", "Lions", "Packers",
+        "Texans", "Colts", "Jaguars", "Chiefs",
+        "Raiders", "Chargers", "Rams", "Dolphins",
+        "Vikings", "Patriots", "Saints", "Giants",
+        "Jets", "Eagles", "Pittsburgh", "49ers",
+        "Seahawks", "Buccaneers", "Titans", "Commanders"
     }
 
-def trade_generator():
-    """Handles the trade request scenario for a franchise-tagged player or a player requesting a trade."""
-    print("The player has requested a trade!")
+def trade_simulation_gui():
     teams = get_nfl_teams()
-
-    # User selects their current team
-    user_team = input("Enter the team you are playing for: ").strip()
-    if user_team not in teams:
-        print("Invalid team name. Please enter a valid NFL team.")
+    root = tk.Tk(); root.withdraw()
+    user_team = simpledialog.askstring("Your Team", "Enter the team you are playing for:")
+    if not user_team or user_team.strip() not in teams:
+        messagebox.showerror("Invalid Team", "Invalid team name. Please restart.")
         return
+    teams.remove(user_team.strip())
 
-    teams.remove(user_team)  # Remove user's team from trade options
-
-    while True:
-        # Generate a random trade destination
+    while teams:
         trade_team = random.choice(list(teams))
-        print(f"Proposed trade destination: {trade_team}")
+        ans = messagebox.askquestion(
+            "Trade Offer",
+            f"Proposed trade destination: {trade_team}\nDo you accept this trade?"
+        )
+        if ans == "yes":
+            messagebox.showinfo("Trade Complete", f"Trade to {trade_team} confirmed!")
+            return
+        teams.remove(trade_team)
 
-        # Ask user if they accept
-        accept = input("Do you accept this trade? (yes/no): ").strip().lower()
-        if accept == "yes":
-            print("Trade confirmed! Program ending.")
-            break
-        elif accept == "no":
-            print("Rerolling new trade destination...\n")
-        else:
-            print("Invalid input. Please enter 'yes' or 'no'.")
+    messagebox.showinfo("No Trades", "No more teams left to trade to. Trade request failed.")
 
-def resign_generator():
-    """Handles the decision for a rookie player choosing between an extension, free agency, or requesting a trade."""
-    decision = random.choice(["Resign", "Test Free Agency", "Request Trade"])
-    
-    if decision == "Resign":
-        print("The player has accepted a contract extension! Program ending.")
+def rookie_deal_simulation():
+    root = tk.Tk(); root.withdraw()
+    position = simpledialog.askstring(
+        "Position",
+        "What position do you play? (QB, RB, WR, CB, LB, DT, OL)"
+    )
+    if not position:
+        messagebox.showerror("Error", "Position not entered.")
         return
-    elif decision == "Test Free Agency":
-        print("The player has decided to test free agency!")
+
+    pos = position.strip().upper()
+    stats = {}
+
+    # Gather stats based on position
+    if pos == "QB":
+        stats["Passing Yards"]   = simpledialog.askinteger("Stat", "Enter passing yards:")
+        stats["Touchdowns"]      = simpledialog.askinteger("Stat", "Enter number of touchdowns:")
+        stats["Interceptions"]   = simpledialog.askinteger("Stat", "Enter number of interceptions:")
+
+    elif pos == "RB":
+        stats["Rushing Yards"]   = simpledialog.askinteger("Stat", "Enter rushing yards:")
+        stats["Touchdowns"]      = simpledialog.askinteger("Stat", "Enter number of touchdowns:")
+        stats["Fumbles"]         = simpledialog.askinteger("Stat", "Enter number of fumbles:")
+
+    elif pos == "WR":
+        stats["Receiving Yards"] = simpledialog.askinteger("Stat", "Enter receiving yards:")
+        stats["Touchdowns"]      = simpledialog.askinteger("Stat", "Enter number of touchdowns:")
+        stats["Drops"]           = simpledialog.askinteger("Stat", "Enter number of drops:")
+
+    elif pos == "CB":
+        stats["Interceptions"]   = simpledialog.askinteger("Stat", "Enter number of interceptions:")
+        stats["Pass Breakups"]   = simpledialog.askinteger("Stat", "Enter number of pass breakups:")
+        stats["Tackles"]         = simpledialog.askinteger("Stat", "Enter number of tackles:")
+
+    elif pos == "LB":
+        stats["Tackles"]     = simpledialog.askinteger("Stat", "Enter number of tackles:")
+        stats["Interceptions"] = simpledialog.askinteger("Stat", "Enter number of interceptions:")
+        stats["TFL"]         = simpledialog.askinteger("Stat", "Enter tackles for loss:")
+        stats["Sacks"]       = simpledialog.askfloat("Stat", "Enter number of sacks:")
+
+    elif pos == "DT":
+        stats["Sacks"]       = simpledialog.askfloat("Stat", "Enter number of sacks:")
+        stats["TFL"]         = simpledialog.askinteger("Stat", "Enter tackles for loss:")
+
+    elif pos == "OL":  # Offensive Lineman
+        stats["Sacks Allowed"] = simpledialog.askfloat("Stat", "Enter sacks allowed (can be 0.5, etc):")
+        stats["Pancakes"]      = simpledialog.askinteger("Stat", "Enter pancake blocks:")
+
     else:
-        print("The player has requested a trade!")
-        trade_generator()  # Call trade generator instead of free agency
-        return
+        messagebox.showinfo("Unknown Position", "We'll accept basic performance stats.")
+        stats["Games Played"] = simpledialog.askinteger("Stat", "Enter number of games played:")
+        stats["Overall Grade"]= simpledialog.askinteger("Stat", "Enter your performance rating (1-100):")
 
-    teams = get_nfl_teams()
-    
-    # User selects their current team (for removal)
-    user_team = input("Enter the team you are playing for: ").strip()
-    if user_team not in teams:
-        print("Invalid team name. Please enter a valid NFL team.")
-        return
+    # Randomly decide: contract or trade
+    final_decision = random.choice(["Contract", "Trade"])
+    if final_decision == "Trade":
+        messagebox.showinfo("Trade Requested", "You’ve requested a trade!")
+        return trade_simulation_gui()
 
-    teams.remove(user_team)  # Remove user's team from potential signing destinations
-
-    while True:
-        # Generate a random free agency signing
-        signing_team = random.choice(list(teams))
-        print(f"Free Agency offer from: {signing_team}")
-
-        # Ask user if they accept
-        accept = input("Do you accept this offer? (yes/no): ").strip().lower()
-        if accept == "yes":
-            print("Contract signed! Program ending.")
-            break
-        elif accept == "no":
-            print("Rerolling another offer...\n")
+    # Evaluate performance
+    performance = "Poor"
+    if pos == "QB":
+        y, t = stats.get("Passing Yards",0), stats.get("Touchdowns",0)
+        if y > 4000 and t > 30: performance="Great"
+        elif y > 3000 and t > 20: performance="Okay"
+    elif pos == "RB":
+        y, t = stats.get("Rushing Yards",0), stats.get("Touchdowns",0)
+        if y > 1300 and t > 12: performance="Great"
+        elif y > 800  and t > 6: performance="Okay"
+    elif pos == "WR":
+        y, t = stats.get("Receiving Yards",0), stats.get("Touchdowns",0)
+        if y > 1200 and t > 10: performance="Great"
+        elif y > 700  and t > 5: performance="Okay"
+    elif pos == "CB":
+        p = stats.get("Interceptions",0)
+        if p > 5: performance="Great"
+        elif p > 2: performance="Okay"
+    elif pos == "LB":
+        tkls, sks = stats.get("Tackles",0), stats.get("Sacks",0)
+        if tkls > 90 and sks > 6: performance="Great"
+        elif tkls > 60 and sks > 3: performance="Okay"
+    elif pos == "DT":
+        sks, tfl = stats.get("Sacks",0), stats.get("TFL",0)
+        if sks > 7 and tfl > 9: performance="Great"
+        elif sks > 4 and tfl > 5: performance="Okay"
+    elif pos == "OL":
+        sa = stats.get("Sacks Allowed", 0.0)
+        if sa <= 5:
+            performance = "Great"
+        elif sa <= 10:
+            performance = "Okay"
         else:
-            print("Invalid input. Please enter 'yes' or 'no'.")
+            performance = "Poor"
 
-def main():
-    """Main function to let the user choose between the Trade Generator and the Resign Generator."""
-    while True:
-        choice = input("Do you want the Trade Generator or Resign Generator? (trade/resign): ").strip().lower()
-        if choice == "trade":
-            trade_generator()
-            break
-        elif choice == "resign":
-            resign_generator()
-            break
-        else:
-            print("Invalid input. Please enter 'trade' or 'resign'.")
+    # Ask for overall rating and age
+    ovr = simpledialog.askinteger("Overall Rating", "Enter your player OVR (0–100):")
+    age = simpledialog.askinteger("Age", "Enter your age:")
+
+    # Base salary & bonus by performance
+    if performance == "Great":
+        base_salary, base_bonus = 20_000_000, 8_000_000
+    elif performance == "Okay":
+        base_salary, base_bonus = 12_000_000, 4_000_000
+    else:
+        base_salary, base_bonus =  6_000_000, 1_000_000
+
+    # Adjust by OVR
+    if ovr >= 90:
+        base_salary += 4_000_000; base_bonus += 2_000_000
+    elif ovr >= 80:
+        base_salary += 2_000_000; base_bonus += 1_000_000
+    elif ovr <= 65:
+        base_salary -= 1_000_000; base_bonus -=   500_000
+
+    # Adjust by age
+    if age <= 25:
+        base_salary += 2_000_000; base_bonus += 1_000_000
+    elif age >= 30:
+        base_salary -= 2_000_000; base_bonus -= 1_000_000
+
+    # Enforce minimums
+    base_salary = max(base_salary, 1_000_000)
+    base_bonus  = max(base_bonus, 0)
+
+    # Contract length: start from performance, then tweak by OVR & age
+    if performance == "Great":
+        years = 4
+    elif performance == "Okay":
+        years = 3
+    else:
+        years = 2
+
+    if ovr >= 90:    years += 1
+    if age <= 25:    years += 1
+    if age >= 32:    years -= 1
+
+    contract_years = max(1, min(years, 5))
+
+    # Format outputs
+    contract_salary = f"${base_salary // 1_000_000}M/year"
+    contract_bonus  = f"${base_bonus  // 1_000_000}M signing bonus"
+    contract_length = f"{contract_years} year{'s' if contract_years > 1 else ''}"
+
+    # Show contract
+    messagebox.showinfo(
+        "Contract Offer",
+        f"Stats: {stats}\n"
+        f"Performance: {performance}\n"
+        f"OVR: {ovr} | Age: {age}\n\n"
+        f"Suggested Contract:\n"
+        f" • Salary: {contract_salary}\n"
+        f" • Bonus:  {contract_bonus}\n"
+        f" • Length: {contract_length}"
+    )
+
+def start_franchise_path_gui():
+    if franchise_decision() == "Play":
+        messagebox.showinfo("Decision", "Staying under franchise tag – program ends.")
+    else:
+        messagebox.showinfo("Decision", "Requesting trade!")
+        trade_simulation_gui()
+
+def start_rookie_path_gui():
+    rookie_deal_simulation()
+
+def gui_start():
+    root = tk.Tk()
+    root.title("NFL Player Path Selection")
+    root.geometry("400x300")
+    root.configure(bg="#1E90FF")
+
+    frame = tk.Frame(root, bg="#1E90FF")
+    frame.pack(expand=True)
+
+    tk.Label(frame, text="Choose your path", font=("Arial",18,"bold"),
+             bg="#1E90FF", fg="white").pack(pady=20)
+
+    tk.Button(frame, text="Franchise Tag Method",
+              command=lambda: [root.destroy(), start_franchise_path_gui()],
+              width=30, height=2, bg="#FFD700", fg="black",
+              font=("Arial",12,"bold")).pack(pady=10)
+
+    tk.Button(frame, text="Rookie Deal Method",
+              command=lambda: [root.destroy(), start_rookie_path_gui()],
+              width=30, height=2, bg="#32CD32", fg="white",
+              font=("Arial",12,"bold")).pack(pady=10)
+
+    root.mainloop()
 
 if __name__ == "__main__":
-    main()
+    gui_start()

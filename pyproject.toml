@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Madden randonmizer"
+version = "0.6.0"
+authors = [
+  { name = "Michael Miller", email = "mmille42@rams.shepherd.edu" }
+]
+description = "Simulates an NFL player's decision to play under a franchise tag or request a trade."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.7"
